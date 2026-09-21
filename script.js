@@ -23,23 +23,11 @@
   });
   window.setTimeout(function () { hideLoader(loader); }, 2000);
 
-  var todayLine = doc.getElementById('today-line');
-  if (todayLine) {
-    var days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-    var months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    var now = new Date();
-    var dayName = days[now.getDay()];
-    var dateText = dayName.charAt(0).toUpperCase() + dayName.slice(1) + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
-    todayLine.textContent = now.getDay() === 1
-      ? 'Hoy es lunes 💘 · ' + dateText
-      : 'Feliz día, mi amor 💘 · ' + dateText;
-  }
-
   /* ---------- Background canvas: floating hearts + sparkles ---------- */
 
   var canvas = doc.getElementById('bg-canvas');
   var ctx = canvas ? canvas.getContext('2d') : null;
-  var heartEmojis = ['💘'];
+  var heartEmojis = ['💘', '💜', '💖', '💗', '💕', '🩷', '❤️', '🌻', '🌹', '🌷', '🌸', '💮', '🌺'];
   var particles = { hearts: [], sparkles: [] };
 
   function sizeCanvas() {
@@ -235,7 +223,7 @@
 
   /* ---------- Heart explosion ---------- */
 
-  var burstEmojis = ['💘', '💘', '💘', '🌸', '✨'];
+  var burstEmojis = ['💘', '💘', '💘', '💜', '💖', '🌻', '🌹', '🌷', '🌸', '✨'];
 
   function explode(x, y, count) {
     if (reducedMotion) {
@@ -295,6 +283,109 @@
       againBtn.blur();
       revealSecret(againBtn);
     });
+  }
+
+  /* ---------- Cinematic final ---------- */
+
+  var finalSection = doc.getElementById('final');
+  var starfieldEl = doc.querySelector('#final .starfield');
+  var nightHeartsEl = doc.querySelector('#final .night-hearts');
+  var finalShowEls = Array.prototype.slice.call(doc.querySelectorAll('#final .line, #final .replay'));
+
+  function makeStars() {
+    if (!starfieldEl) return;
+    if (starfieldEl.getAttribute('data-built')) return;
+    starfieldEl.setAttribute('data-built', '1');
+    var count = isMobile ? 36 : 80;
+    for (var i = 0; i < count; i++) {
+      var s = doc.createElement('span');
+      s.className = 'star';
+      s.style.setProperty('--s', (Math.random() * 1.6 + 1).toFixed(2) + 'px');
+      s.style.left = (Math.random() * 98).toFixed(1) + '%';
+      s.style.top = (Math.random() * 94).toFixed(1) + '%';
+      s.style.setProperty('--tw', (2.4 + Math.random() * 3.6).toFixed(2) + 's');
+      s.style.setProperty('--td', (Math.random() * 4).toFixed(2) + 's');
+      starfieldEl.appendChild(s);
+    }
+    if (!reducedMotion) {
+      for (var j = 0; j < 2; j++) {
+        var sh = doc.createElement('span');
+        sh.className = 'shoot';
+        sh.style.top = (5 + Math.random() * 20).toFixed(0) + '%';
+        sh.style.left = (45 + Math.random() * 50).toFixed(0) + '%';
+        sh.style.setProperty('--dur', (11 + Math.random() * 7).toFixed(1) + 's');
+        sh.style.setProperty('--td2', (5 + j * 12 + Math.random() * 6).toFixed(1) + 's');
+        starfieldEl.appendChild(sh);
+      }
+    }
+  }
+
+  function makeNightHearts() {
+    if (!nightHeartsEl) return;
+    var pool = ['💘', '💘', '💘', '💜', '💖', '🩷'];
+    var count = isMobile ? 13 : 26;
+    for (var i = 0; i < count; i++) {
+      var h = doc.createElement('span');
+      h.className = 'nheart';
+      h.textContent = pool[Math.floor(Math.random() * pool.length)];
+      if (Math.random() > 0.62) h.classList.add('blur');
+      h.style.setProperty('--x', (Math.random() * 96).toFixed(1) + '%');
+      h.style.setProperty('--sz', (18 + Math.random() * 26).toFixed(0) + 'px');
+      h.style.setProperty('--dur', (7 + Math.random() * 6).toFixed(2) + 's');
+      h.style.setProperty('--del', (Math.random() * 6).toFixed(2) + 's');
+      h.style.setProperty('--rot', (Math.random() * 18 - 9).toFixed(1) + 'deg');
+      nightHeartsEl.appendChild(h);
+    }
+  }
+
+  function showFinalLine(selector, t) {
+    window.setTimeout(function () {
+      var el = doc.querySelector('#final ' + selector);
+      if (el) {
+        el.classList.add('show');
+        if (el.classList.contains('l3')) el.classList.add('glow');
+      }
+    }, t);
+  }
+
+  function startFinal() {
+    if (!finalSection) return;
+    finalSection.classList.add('active');
+    makeStars();
+
+    if (reducedMotion) {
+      finalSection.classList.add('hearts-on');
+      makeNightHearts();
+      finalShowEls.forEach(function (el) { el.classList.add('show'); });
+      return;
+    }
+
+    showFinalLine('.l1', 600);
+    showFinalLine('.l2', 2200);
+    showFinalLine('.l3', 3800);
+    showFinalLine('.msg1', 8500);
+    showFinalLine('.msg2', 10500);
+    showFinalLine('.thanks', 15600);
+    showFinalLine('.replay', 18000);
+
+    window.setTimeout(function () {
+      if (finalSection) finalSection.classList.add('hearts-on');
+      makeNightHearts();
+    }, 11800);
+  }
+
+  var finalStarted = false;
+  if (finalSection && 'IntersectionObserver' in window) {
+    var finalIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !finalStarted) {
+          finalStarted = true;
+          finalIo.disconnect();
+          startFinal();
+        }
+      });
+    }, { threshold: 0.45 });
+    finalIo.observe(finalSection);
   }
 
   /* ---------- Back to top ---------- */

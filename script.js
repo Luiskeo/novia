@@ -31,15 +31,15 @@
     var dayName = days[now.getDay()];
     var dateText = dayName.charAt(0).toUpperCase() + dayName.slice(1) + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
     todayLine.textContent = now.getDay() === 1
-      ? 'Hoy es lunes ❤️ · ' + dateText
-      : 'Feliz día, mi amor ❤️ · ' + dateText;
+      ? 'Hoy es lunes 💘 · ' + dateText
+      : 'Feliz día, mi amor 💘 · ' + dateText;
   }
 
   /* ---------- Background canvas: floating hearts + sparkles ---------- */
 
   var canvas = doc.getElementById('bg-canvas');
   var ctx = canvas ? canvas.getContext('2d') : null;
-  var heartEmojis = ['❤️', '💗', '💖', '💕', '💞', '🩷'];
+  var heartEmojis = ['💘'];
   var particles = { hearts: [], sparkles: [] };
 
   function sizeCanvas() {
@@ -228,7 +228,7 @@
 
   /* ---------- Heart explosion ---------- */
 
-  var burstEmojis = ['❤️', '💗', '💖', '💕', '💞', '💘', '🩷', '🌸', '✨'];
+  var burstEmojis = ['💘', '💘', '💘', '🌸', '✨'];
 
   function explode(x, y, count) {
     if (reducedMotion) {

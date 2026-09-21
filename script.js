@@ -199,30 +199,37 @@
   /* ---------- Music ---------- */
 
   var audio = doc.getElementById('bg-music');
-  var musicBtn = doc.getElementById('music-btn');
-  var musicOk = true;
+  var audioFailed = false;
 
-  if (audio && musicBtn) {
+  function tryPlayMusic() {
+    if (!audio || audioFailed || !audio.paused) return;
+    var p = audio.play();
+    if (p && p.catch) {
+      p.catch(function () {});
+    }
+  }
+
+  if (audio) {
     audio.volume = 0.5;
     audio.addEventListener('error', function () {
-      musicOk = false;
-      musicBtn.classList.add('disabled');
-      musicBtn.setAttribute('aria-disabled', 'true');
-      musicBtn.title = 'Añade un archivo de música en assets/music.mp3';
+      audioFailed = true;
+      removeUnlock();
     });
-    musicBtn.addEventListener('click', function () {
-      if (!musicOk) return;
-      if (audio.paused) {
-        var p = audio.play();
-        if (p && p.then) {
-          p.then(function () { musicBtn.classList.add('playing'); }).catch(function () {});
-        } else {
-          musicBtn.classList.add('playing');
-        }
-      } else {
-        audio.pause();
-        musicBtn.classList.remove('playing');
-      }
+
+    tryPlayMusic();
+
+    var unlockEvents = ['pointerdown', 'click', 'touchstart', 'touchend', 'keydown', 'scroll'];
+    var unlock = function () {
+      tryPlayMusic();
+      if (audioFailed || !audio.paused) removeUnlock();
+    };
+    function removeUnlock() {
+      unlockEvents.forEach(function (ev) {
+        window.removeEventListener(ev, unlock);
+      });
+    }
+    unlockEvents.forEach(function (ev) {
+      window.addEventListener(ev, unlock, { passive: true });
     });
   }
 
